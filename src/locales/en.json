@@ -1,0 +1,19 @@
+{
+    "app": {
+        "title": "Git Theme App"
+    },
+    "auth": {
+        "login": "Login",
+        "register": "Register",
+        "email": "Email",
+        "password": "Password",
+        "name": "Name",
+        "submit": "Submit",
+        "haveAccount": "Already have an account?",
+        "noAccount": "Don't have an account?"
+    },
+    "dashboard": {
+        "welcome": "Welcome, {{name}}",
+        "profile": "Profile"
+    }
+}
