@@ -1,130 +1,90 @@
-# GitHub Repository Bookmark Manager
+# GitHub Explorer & Bookmark Manager
 
-A modern, accessible React application for searching GitHub repositories, managing bookmarks, and visualizing analytics.
+A modern, responsive React application for searching GitHub users and repositories, viewing details, and managing bookmarks with analytics.
 
-## Features
+## 🚀 Features
 
-✅ **GitHub Search** - Search repositories and users with advanced filters  
-✅ **Bookmarks** - Save and manage favorite repositories  
-✅ **CSV Import** - Bulk import repositories with validation  
-✅ **Analytics** - Visualize bookmarking activity over time  
-✅ **Authentication** - Secure JWT-based auth  
-✅ **Responsive Design** - Works on all devices  
-✅ **Accessibility** - WCAG 2.1 AA compliant  
+- **Search**:
+  - Search for GitHub users and repositories.
+  - Real-time autocomplete suggestions.
+  - Advanced filtering (users vs. repositories).
+- **Bookmarks**:
+  - Save favorite repositories.
+  - Sort bookmarks by date or name.
+  - Import bookmarks from CSV.
+  - Export/Download sample CSV format.
+- **Analytics**:
+  - Visual analytics of bookmarking activity over time.
+  - Filter analytics by date range (Today, 7 days, 30 days, etc.).
+- **User Details**:
+  - View detailed user profiles including repositories.
+- **Responsive Design**:
+  - Fully responsive UI optimized for mobile, tablet, and desktop.
 
-## Tech Stack
+## 🛠 Tech Stack
 
-- React 18 + TypeScript
-- TanStack Router + Query
-- Zustand (State Management)
-- Axios (HTTP Client)
-- Recharts (Charts)
-- Tailwind CSS
-- Vitest (Testing)
+- **Frontend**: React, TypeScript, Vite
+- **Styling**: Tailwind CSS, Lucide React (Icons)
+- **State Management**: React Query (TanStack Query), Zustand
+- **Routing**: TanStack Router
+- **Charts**: Recharts
+- **HTTP Client**: Axios
 
-## Getting Started
-
-### Prerequisites
-
-- Node.js 18+
-- Backend API running at `http://localhost:8000`
-
-### Installation
-
-```bash
-npm install
-```
-
-### Development
-
-```bash
-npm run dev
-```
-
-Open [http://localhost:5173](http://localhost:5173)
-
-### Build
-
-```bash
-npm run build
-```
-
-### Testing
-
-```bash
-npm run test              # Run tests
-npm run test:ui           # Interactive UI
-npm run test:coverage     # Coverage report
-```
-
-## Project Structure
+## 📂 Folder Structure
 
 ```
 src/
+├── components/         # Shared UI components (Button, Input, Card, etc.)
+├── constants/          # Application constants (Text strings, config)
 ├── features/           # Feature-based modules
-│   ├── auth/          # Authentication
-│   ├── github/        # GitHub search
-│   ├── bookmarks/     # Bookmark management
-│   ├── analytics/     # Analytics & charts
-│   └── dashboard/     # Main dashboard
-├── components/ui/     # Reusable UI components
-├── lib/               # Utilities & config
-└── types/             # TypeScript types
+│   ├── analytics/      # Analytics feature logic
+│   ├── auth/           # Authentication logic
+│   ├── bookmarks/      # Bookmarks management
+│   ├── dashboard/      # Main dashboard view and components
+│   └── github/         # GitHub API integration
+├── hooks/              # Custom React hooks (useDebounce, useInfiniteScroll)
+├── lib/                # Library configurations (API client, query keys)
+├── store/              # Global state stores (Toast, Auth)
+└── utils/              # Utility functions
 ```
 
-## Usage
+## ⚡ Setup Guide
 
-### Search Repositories
+1.  **Clone the repository**:
+    ```bash
+    git clone <repository-url>
+    cd machine-test-front-end
+    ```
 
-1. Go to "Search Repositories" tab
-2. Enter query (e.g., `language:python stars:>1000`)
-3. Click bookmark icon to save
+2.  **Install dependencies**:
+    ```bash
+    npm install
+    ```
 
-### Manage Bookmarks
+3.  **Run the development server**:
+    ```bash
+    npm run dev
+    ```
 
-1. Navigate to "My Bookmarks" tab
-2. View, remove, or import bookmarks
-3. Use "Import CSV" for bulk operations
+4.  **Build for production**:
+    ```bash
+    npm run build
+    ```
 
-### View Analytics
+## 🎨 Theming
 
-1. Open "Analytics" tab
-2. See bookmarking trends over time
+The application uses CSS variables for theming, defined in `src/index.css`.
+- `--primary`: Main brand color (Green)
+- `--secondary`: Secondary action color (Purple)
+- `--danger`: Error/Destructive color (Red)
 
-## API Endpoints
+## ♿ Accessibility
 
-- `POST /api/v1/auth/login` - Login
-- `POST /api/v1/auth/register` - Register
-- `GET /api/v1/github/search/repos` - Search repos
-- `GET /api/v1/bookmarks/` - List bookmarks
-- `POST /api/v1/bookmarks/` - Create bookmark
-- `DELETE /api/v1/bookmarks/{id}` - Remove bookmark
-- `POST /api/v1/bookmarks/import` - Import CSV
-- `GET /api/v1/analytics/stats` - Get stats
+- Semantic HTML structure.
+- ARIA attributes for interactive elements.
+- Keyboard navigation support.
+- WCAG AA compliant color contrast.
 
-## Architecture Highlights
+## 🌐 Internationalization (i18n)
 
-- **Feature-Based Structure**: Self-contained modules
-- **Custom Hooks**: Encapsulated data fetching
-- **Optimistic Updates**: Immediate UI feedback
-- **Query Caching**: Efficient data management
-- **Type Safety**: Full TypeScript coverage
-
-## Performance
-
-- React.memo for component optimization
-- TanStack Query caching (5min stale time)
-- Optimistic UI updates
-- Code splitting ready
-
-## Accessibility
-
-- Keyboard navigation
-- ARIA labels
-- Focus management
-- Semantic HTML
-- WCAG AA color contrast
-
-## License
-
-MIT
+All user-facing text is centralized in `src/constants/text.ts` to facilitate future translation efforts.

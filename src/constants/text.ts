@@ -1,0 +1,43 @@
+export const TEXT = {
+  SEARCH: {
+    TITLE: "Search GitHub",
+    DESCRIPTION_USERS: "users and explore their repositories",
+    DESCRIPTION_REPOS: "and bookmark your favorite repositories",
+    PLACEHOLDER_USERS: "Search users (e.g. location:india)",
+    PLACEHOLDER_REPOS: "Search repositories (e.g. language:python)",
+    SUGGESTIONS_LABEL: "Suggestions",
+    NO_SUGGESTIONS: "No suggestions found",
+    RESULTS_TITLE: "Search Results",
+    RESULTS_USERS_SUBTITLE: "GitHub Users",
+    RESULTS_REPOS_SUBTITLE: "GitHub Repositories",
+    FOUND: "Found",
+    REPOSITORIES: "repositories",
+    USERS: "users",
+    VIEW_ON_GITHUB: "View on GitHub",
+  },
+  BOOKMARKS: {
+    TITLE: "Bookmarked Repositories",
+    DESCRIPTION: "Manage your saved repositories",
+    SEARCH_PLACEHOLDER: "Search bookmarks...",
+    ANALYTICS_BUTTON: "Analytics",
+    IMPORT_BUTTON: "Import CSV",
+    CSV_REQUIREMENTS_TITLE: "CSV Format Requirements",
+    CSV_REQUIREMENTS_DESC: "Your CSV file must include the following columns:",
+    DOWNLOAD_SAMPLE: "Download Sample CSV",
+    NO_BOOKMARKS_TITLE: "No bookmarks yet",
+    NO_BOOKMARKS_DESC: "Start by searching and bookmarking repositories!",
+    ADDED_PREFIX: "Added",
+    IMPORT_SUCCESS: "Bookmarks imported successfully!",
+    IMPORT_ERROR: "Failed to import bookmarks. Please check the file format.",
+    INVALID_FILE: "Please upload a valid CSV file",
+  },
+  ANALYTICS: {
+    TITLE: "Bookmark Analytics",
+    DESCRIPTION: "Track your bookmarking activity over time",
+    NO_DATA_TITLE: "No analytics data yet",
+    NO_DATA_DESC: "Start bookmarking repositories to see your activity!",
+  },
+  COMMON: {
+    LOADING: "Loading...",
+  }
+}

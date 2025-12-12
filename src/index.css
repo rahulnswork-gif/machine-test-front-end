@@ -3,6 +3,14 @@
 @tailwind utilities;
 
 @layer base {
+    :root {
+        --primary: 45 164 78;
+        --secondary: 130 80 223;
+        --danger: 207 34 46;
+        --background: 248 250 252;
+        --foreground: 15 23 42;
+    }
+
     html {
         scroll-behavior: smooth;
         -webkit-font-smoothing: antialiased;

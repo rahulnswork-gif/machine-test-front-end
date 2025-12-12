@@ -22,7 +22,7 @@ export const useCreateBookmark = () => {
   return useMutation({
     mutationFn: (data: BookmarkCreate) => bookmarksApi.createBookmark(data),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: queryKeys.bookmarks.list() })
+      queryClient.invalidateQueries({ queryKey: ['bookmarks', 'list'] })
       queryClient.invalidateQueries({ queryKey: queryKeys.analytics.stats() })
     },
   })
@@ -35,21 +35,21 @@ export const useDeleteBookmark = () => {
     mutationFn: (bookmarkId: number) => bookmarksApi.deleteBookmark(bookmarkId),
     // Optimistic update
     onMutate: async (bookmarkId) => {
-      await queryClient.cancelQueries({ queryKey: queryKeys.bookmarks.list() })
+      await queryClient.cancelQueries({ queryKey: ['bookmarks', 'list'] })
       
-      const previousBookmarks = queryClient.getQueryData(queryKeys.bookmarks.list())
+      const previousBookmarks = queryClient.getQueryData(['bookmarks', 'list'])
       
-      queryClient.setQueryData(queryKeys.bookmarks.list(), (old: any) =>
+      queryClient.setQueryData(['bookmarks', 'list'], (old: any) =>
         old?.filter((bookmark: any) => bookmark.id !== bookmarkId)
       )
       
       return { previousBookmarks }
     },
     onError: (_err, _bookmarkId, context) => {
-      queryClient.setQueryData(queryKeys.bookmarks.list(), context?.previousBookmarks)
+      queryClient.setQueryData(['bookmarks', 'list'], context?.previousBookmarks)
     },
     onSettled: () => {
-      queryClient.invalidateQueries({ queryKey: queryKeys.bookmarks.list() })
+      queryClient.invalidateQueries({ queryKey: ['bookmarks', 'list'] })
       queryClient.invalidateQueries({ queryKey: queryKeys.analytics.stats() })
     },
   })
@@ -61,7 +61,7 @@ export const useImportBookmarks = () => {
   return useMutation({
     mutationFn: (file: File) => bookmarksApi.importBookmarks(file),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: queryKeys.bookmarks.list() })
+      queryClient.invalidateQueries({ queryKey: ['bookmarks', 'list'] })
       queryClient.invalidateQueries({ queryKey: queryKeys.analytics.stats() })
     },
   })

@@ -9,6 +9,7 @@ import { Label } from "@/components/ui/label"
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
 import { useRegister } from "../hooks/useAuth"
 import authImage from "@/assets/images/4380747.jpg"
+import logo from "@/assets/images/gitlylonglogo.png"
 
 const registerSchema = z.object({
   name: z.string().min(2, "Name must be at least 2 characters"),
@@ -58,6 +59,9 @@ export function RegisterForm() {
         
         <Card className="w-full max-w-md border-slate-200 bg-white shadow-xl">
           <CardHeader className="space-y-2 pb-6">
+            <div className="flex justify-center mb-4">
+              <img src={logo} alt="Gitly" className="w-[9rem] h-[5rem] object-contain" />
+            </div>
             <CardTitle className="text-3xl font-bold text-slate-900">{t('auth.register')}</CardTitle>
             <CardDescription className="text-slate-600">Create a new account to get started</CardDescription>
           </CardHeader>

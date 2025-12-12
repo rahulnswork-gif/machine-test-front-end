@@ -9,9 +9,9 @@ export default {
             colors: {
                 // Git-themed colors (inspired by GitHub/GitLab)
                 git: {
-                    primary: '#2da44e', // GitHub green
-                    secondary: '#8250df', // GitHub purple
-                    danger: '#cf222e', // GitHub red
+                    primary: 'rgb(var(--primary) / <alpha-value>)',
+                    secondary: 'rgb(var(--secondary) / <alpha-value>)',
+                    danger: 'rgb(var(--danger) / <alpha-value>)',
                     dark: '#0d1117', // GitHub dark bg
                     gray: '#161b22', // GitHub dark secondary bg
                     border: '#30363d', // GitHub dark border

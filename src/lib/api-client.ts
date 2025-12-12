@@ -1,5 +1,6 @@
 import axios from 'axios'
 import { useAuthStore } from '@/store/useAuthStore'
+import { useToastStore } from '@/store/useToastStore'
 
 const API_BASE_URL = 'http://localhost:8000/api/v1'
 
@@ -109,6 +110,11 @@ apiClient.interceptors.response.use(
       } finally {
         isRefreshing = false
       }
+    }
+
+    if (error.response?.status !== 401 && error.response?.status !== 403) {
+      const message = error.response?.data?.detail || 'An unexpected error occurred'
+      useToastStore.getState().addToast(message, 'error')
     }
 
     return Promise.reject(error)
