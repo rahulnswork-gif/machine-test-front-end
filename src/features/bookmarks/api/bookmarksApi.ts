@@ -2,7 +2,7 @@ import apiClient from '@/lib/api-client'
 import type { Bookmark, BookmarkCreate, PaginatedBookmarksResponse } from '@/types/api'
 
 export const bookmarksApi = {
-  getBookmarks: async (params?: { page?: number; per_page?: number; q?: string }): Promise<PaginatedBookmarksResponse> => {
+  getBookmarks: async (params?: { page?: number; per_page?: number; q?: string; sort_by?: 'created_at' | 'name' | 'full_name'; order?: 'asc' | 'desc' }): Promise<PaginatedBookmarksResponse> => {
     const response = await apiClient.get('/bookmarks/', { params })
     return response.data
   },

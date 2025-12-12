@@ -8,10 +8,13 @@ export function Header() {
   const { user, logout } = useAuthStore()
   const navigate = useNavigate()
 
-  const handleLogout = () => {
-    authApi.logout()
-    logout()
-    navigate({ to: "/login" })
+  const handleLogout = async () => {
+    try {
+      await authApi.logout()
+    } finally {
+      logout()
+      navigate({ to: "/login" })
+    }
   }
 
   return (

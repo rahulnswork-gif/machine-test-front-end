@@ -5,7 +5,8 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
 import { CustomSelect } from "@/components/ui/custom-select"
-import { Search, Upload, Trash2, BarChart3, Loader2, GitBranch, Star, ExternalLink } from "lucide-react"
+import { Search, Upload, Trash2, BarChart3, Loader2, GitBranch, Star, ExternalLink, Info, Download } from "lucide-react"
+
 import { useSearchRepos, useSearchUsers } from "@/features/github/hooks/useGitHub"
 import { useBookmarks, useDeleteBookmark, useImportBookmarks } from "@/features/bookmarks/hooks/useBookmarks"
 import { useBookmarkStats } from "@/features/analytics/hooks/useAnalytics"
@@ -23,7 +24,7 @@ export function DashboardView() {
   const [showSuggestions, setShowSuggestions] = useState(false)
   
   const searchInputRef = useRef<HTMLDivElement>(null)
-  const fileInputRef = useRef<HTMLInputElement>(null)
+
 
   // Debounced query for autocomplete
   const debouncedQuery = useDebounce(searchQuery, 300)
@@ -78,15 +79,17 @@ export function DashboardView() {
 
   // Bookmarks
   const [bookmarkSearchQuery, setBookmarkSearchQuery] = useState("")
-  const debouncedBookmarkSearchQuery = useDebounce(bookmarkSearchQuery, 300)
-
+  const [sortBy, setSortBy] = useState<'created_at' | 'name' | 'full_name'>('created_at')
+  const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('desc')
+  const [debouncedBookmarkSearch] = useDebounce(bookmarkSearchQuery, 500)
+  
   const { 
     data: bookmarksData, 
-    isLoading: isLoadingBookmarks,
-    fetchNextPage: fetchNextBookmarksPage,
-    hasNextPage: hasNextBookmarksPage,
-    isFetchingNextPage: isFetchingNextBookmarksPage
-  } = useBookmarks(debouncedBookmarkSearchQuery)
+    fetchNextPage: fetchNextBookmarksPage, 
+    hasNextPage: hasNextBookmarksPage, 
+    isFetchingNextPage: isFetchingNextBookmarksPage,
+    isLoading: isLoadingBookmarks 
+  } = useBookmarks(debouncedBookmarkSearch, sortBy, sortOrder)
 
   const bookmarks = bookmarksData?.pages.flatMap(page => page.data) || []
 
@@ -100,7 +103,29 @@ export function DashboardView() {
   const importBookmarks = useImportBookmarks()
 
   const handleImportClick = () => {
-    fileInputRef.current?.click()
+    const input = document.createElement('input')
+    input.type = 'file'
+    input.accept = '.csv'
+    input.onchange = (e) => {
+      const file = (e.target as HTMLInputElement).files?.[0]
+      if (file) handleFileUpload(file)
+    }
+    input.click()
+  }
+
+  const [showInfoTooltip, setShowInfoTooltip] = useState(false)
+
+  const downloadSampleCsv = () => {
+    const csvContent = "owner,repo\nfacebook,react\nvercel,next.js"
+    const blob = new Blob([csvContent], { type: 'text/csv' })
+    const url = window.URL.createObjectURL(blob)
+    const a = document.createElement('a')
+    a.href = url
+    a.download = 'sample_bookmarks.csv'
+    document.body.appendChild(a)
+    a.click()
+    document.body.removeChild(a)
+    window.URL.revokeObjectURL(url)
   }
 
   // Analytics
@@ -193,20 +218,17 @@ export function DashboardView() {
 
   const { addToast } = useToastStore()
 
-  const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0]
+  const handleFileUpload = async (file: File) => {
     if (file) {
       // Validate file type
       if (file.type !== 'text/csv' && !file.name.endsWith('.csv')) {
         addToast('Please upload a valid CSV file', 'error')
-        e.target.value = ''
         return
       }
 
       try {
         await importBookmarks.mutateAsync(file)
         addToast('Bookmarks imported successfully!', 'success')
-        e.target.value = ''
       } catch (error) {
         console.error('Import failed:', error)
         addToast('Failed to import bookmarks. Please check the file format.', 'error')
@@ -258,6 +280,13 @@ export function DashboardView() {
 
   const isSearching = searchType === 'repos' ? isSearchingRepos : isSearchingUsers
   const hasResults = searchType === 'repos' ? !!repoResults : !!userResults
+
+  const analyticsRef = useRef<HTMLDivElement>(null)
+  const tooltipTimeoutRef = useRef<any>(null)
+
+  const scrollToAnalytics = () => {
+    analyticsRef.current?.scrollIntoView({ behavior: 'smooth' })
+  }
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100">
@@ -414,8 +443,16 @@ export function DashboardView() {
                       {allUsers.map((user: any) => (
                         <Card 
                           key={user.id} 
-                          className="hover:shadow-lg transition-all cursor-pointer border-l-4 border-l-emerald-500 bg-white w-full max-w-full" 
+                          className="hover:shadow-lg transition-all cursor-pointer border-l-4 border-l-emerald-500 bg-white w-full max-w-full focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-emerald-500" 
                           onClick={() => viewUserProfile(user.login)}
+                          tabIndex={0}
+                          role="button"
+                          onKeyDown={(e) => {
+                            if (e.key === 'Enter' || e.key === ' ') {
+                              e.preventDefault()
+                              viewUserProfile(user.login)
+                            }
+                          }}
                         >
                           <CardHeader>
                             <div className="flex items-center gap-4">
@@ -426,8 +463,9 @@ export function DashboardView() {
                                   href={user.html_url} 
                                   target="_blank" 
                                   rel="noopener noreferrer" 
-                                  className="text-sm text-emerald-600 hover:underline flex items-center gap-1" 
+                                  className="text-sm text-emerald-600 hover:underline flex items-center gap-1 rounded-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-emerald-500 w-fit" 
                                   onClick={(e) => e.stopPropagation()}
+                                  onKeyDown={(e) => e.stopPropagation()}
                                 >
                                   View on GitHub <ExternalLink className="h-3 w-3 flex-shrink-0" />
                                 </a>
@@ -455,15 +493,17 @@ export function DashboardView() {
         {/* Bookmarks Section */}
         <Card className="border-none shadow-lg bg-white">
           <CardHeader className="bg-gradient-to-r from-purple-500 to-pink-600 text-white">
-            <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+            <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-4">
               <div>
-                <CardTitle className="text-xl">Bookmarked Repositories</CardTitle>
+                <CardTitle className="text-xl">
+                  Bookmarked Repositories
+                </CardTitle>
                 <CardDescription className="text-purple-50">
                   Manage your saved repositories
                 </CardDescription>
               </div>
-              <div className="flex flex-col sm:flex-row gap-3 w-full md:w-auto">
-                <div className="relative w-full md:w-64">
+              <div className="flex flex-col sm:flex-row flex-wrap gap-3 w-full lg:w-auto">
+                <div className="relative w-full sm:flex-1 lg:w-64 min-w-[200px]">
                   <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-purple-200" />
                   <Input
                     placeholder="Search bookmarks..."
@@ -472,27 +512,101 @@ export function DashboardView() {
                     className="pl-9 bg-white/10 border-purple-400/30 text-white placeholder:text-purple-200 focus-visible:ring-white/20"
                   />
                 </div>
-                <div className="relative">
-                  <input
-                    type="file"
-                    accept=".csv"
-                    ref={fileInputRef}
-                    className="hidden"
-                    onChange={handleFileUpload}
-                  />
+                <CustomSelect
+                  value={`${sortBy}-${sortOrder}`}
+                  onChange={(value) => {
+                    const [newSortBy, newOrder] = value.split('-') as ['created_at' | 'name' | 'full_name', 'asc' | 'desc']
+                    setSortBy(newSortBy)
+                    setSortOrder(newOrder)
+                  }}
+                  options={[
+                    { value: 'created_at-desc', label: 'Newest first' },
+                    { value: 'created_at-asc', label: 'Oldest first' },
+                    { value: 'full_name-asc', label: 'Name (A-Z)' },
+                    { value: 'full_name-desc', label: 'Name (Z-A)' }
+                  ]}
+                  variant="glass"
+                  className="w-full sm:w-[180px]"
+                />
+
+                <div className="relative flex items-center gap-2 flex-wrap sm:flex-nowrap">
                   <Button 
                     variant="secondary" 
-                    className="w-full sm:w-auto gap-2 bg-white/10 hover:bg-white/20 text-white border-none"
-                    onClick={handleImportClick}
-                    disabled={importBookmarks.isPending}
+                    className="bg-white/10 hover:bg-white/20 text-white border-none"
+                    onClick={scrollToAnalytics}
                   >
-                    {importBookmarks.isPending ? (
-                      <Loader2 className="h-4 w-4 animate-spin" />
-                    ) : (
-                      <Upload className="h-4 w-4" />
-                    )}
-                    Import CSV
+                    <BarChart3 className="h-4 w-4 mr-2" />
+                    Analytics
                   </Button>
+
+                  <div className="flex items-center">
+                    <Button 
+                      variant="secondary" 
+                      className="w-full sm:w-auto gap-2 bg-white/10 hover:bg-white/20 text-white border-none rounded-r-none border-r border-white/20"
+                      onClick={handleImportClick}
+                      disabled={importBookmarks.isPending}
+                    >
+                      {importBookmarks.isPending ? (
+                        <Loader2 className="h-4 w-4 animate-spin" />
+                      ) : (
+                        <Upload className="h-4 w-4" />
+                      )}
+                      Import CSV
+                    </Button>
+                    
+                    <div 
+                      className="relative h-10"
+                      onMouseEnter={() => {
+                        if (tooltipTimeoutRef.current) {
+                          clearTimeout(tooltipTimeoutRef.current)
+                          tooltipTimeoutRef.current = null
+                        }
+                        setShowInfoTooltip(true)
+                      }}
+                      onMouseLeave={() => {
+                        tooltipTimeoutRef.current = setTimeout(() => {
+                          setShowInfoTooltip(false)
+                        }, 300)
+                      }}
+                    >
+                      <Button
+                        variant="secondary"
+                        size="sm"
+                        className="bg-white/10 hover:bg-white/20 text-white border-none h-10 w-10 p-0 rounded-l-none"
+                        onClick={() => setShowInfoTooltip(!showInfoTooltip)}
+                      >
+                        <Info className="h-5 w-5" />
+                      </Button>
+                      
+                      {showInfoTooltip && (
+                        <div 
+                          className="absolute right-0 top-full mt-2 w-64 p-4 bg-white rounded-lg shadow-xl border border-slate-200 z-50 text-slate-700 text-sm"
+                          onMouseEnter={() => {
+                            if (tooltipTimeoutRef.current) {
+                              clearTimeout(tooltipTimeoutRef.current)
+                              tooltipTimeoutRef.current = null
+                            }
+                          }}
+                        >
+                        <p className="font-semibold mb-2">CSV Format Requirements</p>
+                        <p className="mb-3">Your CSV file must include the following columns:</p>
+                        <ul className="list-disc pl-4 mb-3 space-y-1 text-xs text-slate-600">
+                          <li><code className="bg-slate-100 px-1 rounded">owner</code> (Required)</li>
+                          <li><code className="bg-slate-100 px-1 rounded">repo</code> (Required)</li>
+                        </ul>
+                        <Button 
+                          variant="outline" 
+                          size="sm" 
+                          className="w-full gap-2 text-xs h-8"
+                          onClick={downloadSampleCsv}
+                        >
+                          <Download className="h-3 w-3" />
+                          Download Sample CSV
+                        </Button>
+                      </div>
+                    )}
+                  </div>
+                </div>
                 </div>
               </div>
             </div>
@@ -516,12 +630,12 @@ export function DashboardView() {
                   <Card key={bookmark.id} className="hover:shadow-md transition-shadow border-l-4 border-l-purple-500 bg-white w-full max-w-full relative">
                     <CardHeader className="pr-12">
                       <div className="flex flex-col gap-1 min-w-0 w-full">
-                        <CardTitle className="text-lg truncate w-full">
+                        <CardTitle className="text-lg w-full">
                           <a
                             href={bookmark.html_url}
                             target="_blank"
                             rel="noopener noreferrer"
-                            className="text-blue-500 hover:underline block truncate"
+                            className="text-blue-500 hover:underline block truncate rounded-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-blue-500"
                           >
                             {bookmark.full_name}
                           </a>
@@ -561,72 +675,74 @@ export function DashboardView() {
         </Card>
 
         {/* Analytics Section */}
-        <Card className="border-none shadow-lg bg-white">
-          <CardHeader className="bg-gradient-to-r from-orange-500 to-red-600 text-white">
-            <div className="flex items-center justify-between flex-wrap gap-4">
-              <div>
-                <CardTitle className="text-2xl">Bookmark Analytics</CardTitle>
-                <CardDescription className="text-orange-50">
-                  Track your bookmarking activity over time
-                </CardDescription>
-              </div>
-              <div className="flex items-center gap-2">
-                <CustomSelect
-                  value={dateRange}
-                  onChange={(value) => setDateRange(value)}
-                  options={[
-                    { value: 'today', label: 'Today' },
-                    { value: '7d', label: 'Last 7 Days' },
-                    { value: '30d', label: 'Last 30 Days' },
-                    { value: 'this_year', label: 'This Year' },
-                    { value: '1y', label: 'Last Year' },
-                    { value: 'all', label: 'All Time' }
-                  ]}
-                  variant="glass"
-                  className="w-40"
-                />
-              </div>
-            </div>
-          </CardHeader>
-          <CardContent className="pt-6">
-            {isLoadingStats ? (
-              <div className="flex justify-center py-16">
-                <Loader2 className="h-10 w-10 animate-spin text-orange-500" />
-              </div>
-            ) : chartData.length === 0 ? (
-              <div className="text-center py-16">
-                <div className="w-20 h-20 bg-orange-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                  <BarChart3 className="h-10 w-10 text-orange-500" />
+        <div ref={analyticsRef}>
+          <Card className="border-none shadow-lg bg-white">
+            <CardHeader className="bg-gradient-to-r from-orange-500 to-red-600 text-white">
+              <div className="flex items-center justify-between flex-wrap gap-4">
+                <div>
+                  <CardTitle className="text-2xl">Bookmark Analytics</CardTitle>
+                  <CardDescription className="text-orange-50">
+                    Track your bookmarking activity over time
+                  </CardDescription>
                 </div>
-                <p className="text-slate-600 text-lg">No analytics data yet</p>
-                <p className="text-slate-500 text-sm mt-2">Start bookmarking repositories to see your activity!</p>
+                <div className="flex items-center gap-2">
+                  <CustomSelect
+                    value={dateRange}
+                    onChange={(value) => setDateRange(value)}
+                    options={[
+                      { value: 'today', label: 'Today' },
+                      { value: '7d', label: 'Last 7 Days' },
+                      { value: '30d', label: 'Last 30 Days' },
+                      { value: 'this_year', label: 'This Year' },
+                      { value: '1y', label: 'Last Year' },
+                      { value: 'all', label: 'All Time' }
+                    ]}
+                    variant="glass"
+                    className="w-40"
+                  />
+                </div>
               </div>
-            ) : (
-              <div className="h-[300px] md:h-[400px] w-full">
-                <ResponsiveContainer width="100%" height="100%">
-                  <BarChart data={chartData}>
-                    <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" />
-                    <XAxis dataKey="date" stroke="#64748b" />
-                    <YAxis stroke="#64748b" />
-                    <Tooltip 
-                      contentStyle={{ 
-                        backgroundColor: 'white', 
-                        border: '1px solid #e2e8f0',
-                        borderRadius: '8px',
-                        boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)'
-                      }}
-                    />
-                    <Bar
-                      dataKey="count"
-                      fill="#f97316"
-                      radius={[8, 8, 0, 0]}
-                    />
-                  </BarChart>
-                </ResponsiveContainer>
-              </div>
-            )}
-          </CardContent>
-        </Card>
+            </CardHeader>
+            <CardContent className="pt-6">
+              {isLoadingStats ? (
+                <div className="flex justify-center py-16">
+                  <Loader2 className="h-10 w-10 animate-spin text-orange-500" />
+                </div>
+              ) : chartData.length === 0 ? (
+                <div className="text-center py-16">
+                  <div className="w-20 h-20 bg-orange-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <BarChart3 className="h-10 w-10 text-orange-500" />
+                  </div>
+                  <p className="text-slate-600 text-lg">No analytics data yet</p>
+                  <p className="text-slate-500 text-sm mt-2">Start bookmarking repositories to see your activity!</p>
+                </div>
+              ) : (
+                <div className="h-[300px] md:h-[400px] w-full">
+                  <ResponsiveContainer width="100%" height="100%">
+                    <BarChart data={chartData}>
+                      <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" />
+                      <XAxis dataKey="date" stroke="#64748b" />
+                      <YAxis stroke="#64748b" />
+                      <Tooltip 
+                        contentStyle={{ 
+                          backgroundColor: 'white', 
+                          border: '1px solid #e2e8f0',
+                          borderRadius: '8px',
+                          boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)'
+                        }}
+                      />
+                      <Bar
+                        dataKey="count"
+                        fill="#f97316"
+                        radius={[8, 8, 0, 0]}
+                      />
+                    </BarChart>
+                  </ResponsiveContainer>
+                </div>
+              )}
+            </CardContent>
+          </Card>
+        </div>
       </main>
     </div>
   )

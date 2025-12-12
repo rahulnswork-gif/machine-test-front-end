@@ -25,7 +25,14 @@ export const authApi = {
     return response.data
   },
 
-  logout: () => {
+  logout: async () => {
+    await apiClient.post('/auth/logout')
     localStorage.removeItem('access_token')
+  },
+
+  refreshToken: async (): Promise<Token> => {
+    const response = await apiClient.post<Token>('/auth/refresh')
+    localStorage.setItem('access_token', response.data.access_token)
+    return response.data
   },
 }

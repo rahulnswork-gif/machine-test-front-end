@@ -38,12 +38,12 @@ export function RepoCard({ repo, isBookmarked = false, onBookmarkSuccess }: Repo
     <Card className="hover:shadow-md transition-shadow w-full max-w-full relative">
       <CardHeader className="pr-12">
         <div className="flex flex-col gap-1 min-w-0 w-full">
-          <CardTitle className="text-lg truncate w-full">
+          <CardTitle className="text-lg w-full">
             <a
               href={repo.html_url}
               target="_blank"
               rel="noopener noreferrer"
-              className="text-git-primary hover:underline block truncate"
+              className="text-git-primary hover:underline block truncate rounded-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-blue-500"
             >
               {repo.full_name}
             </a>

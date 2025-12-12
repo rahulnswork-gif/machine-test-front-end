@@ -8,7 +8,7 @@ export const queryKeys = {
   },
   bookmarks: {
     all: ['bookmarks'] as const,
-    list: (query?: string) => [...queryKeys.bookmarks.all, 'list', query] as const,
+    list: (query?: string, sortBy?: string, order?: string) => [...queryKeys.bookmarks.all, 'list', query, sortBy, order] as const,
   },
   analytics: {
     all: ['analytics'] as const,

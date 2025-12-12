@@ -3,11 +3,11 @@ import { bookmarksApi } from '../api/bookmarksApi'
 import { queryKeys } from '@/lib/query-keys'
 import type { BookmarkCreate } from '@/types/api'
 
-export const useBookmarks = (searchQuery: string = '') => {
+export const useBookmarks = (searchQuery: string = '', sortBy: 'created_at' | 'name' | 'full_name' = 'created_at', order: 'asc' | 'desc' = 'desc') => {
   const q = searchQuery.trim() || undefined
   return useInfiniteQuery({
-    queryKey: queryKeys.bookmarks.list(q),
-    queryFn: ({ pageParam = 1 }) => bookmarksApi.getBookmarks({ page: pageParam, per_page: 10, q }),
+    queryKey: queryKeys.bookmarks.list(q, sortBy, order),
+    queryFn: ({ pageParam = 1 }) => bookmarksApi.getBookmarks({ page: pageParam, per_page: 10, q, sort_by: sortBy, order }),
     initialPageParam: 1,
     getNextPageParam: (lastPage) => {
       if (lastPage.page >= lastPage.total_pages) return undefined
