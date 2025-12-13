@@ -10,11 +10,17 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { useRegister } from "../hooks/useAuth"
 import authImage from "@/assets/images/4380747.jpg"
 import logo from "@/assets/images/gitlylonglogo.png"
+import { PasswordStrengthIndicator } from "./PasswordStrengthIndicator"
 
 const registerSchema = z.object({
   name: z.string().min(2, "Name must be at least 2 characters"),
   email: z.string().email("Invalid email address"),
-  password: z.string().min(6, "Password must be at least 6 characters"),
+  password: z.string()
+    .min(6, "Password must be at least 6 characters")
+    .regex(/[A-Z]/, "Password must contain at least one uppercase letter")
+    .regex(/[a-z]/, "Password must contain at least one lowercase letter")
+    .regex(/[0-9]/, "Password must contain at least one number")
+    .regex(/[^A-Za-z0-9]/, "Password must contain at least one special character"),
 })
 
 type RegisterFormValues = z.infer<typeof registerSchema>
@@ -30,7 +36,10 @@ export function RegisterForm() {
       email: "",
       password: "",
     },
+    mode: "onChange", // Enable real-time validation
   })
+
+  const password = form.watch("password");
 
   const onSubmit = (data: RegisterFormValues) => {
     registerMutation.mutate({
@@ -110,6 +119,7 @@ export function RegisterForm() {
                   disabled={registerMutation.isPending}
                   {...form.register("password")} 
                 />
+                <PasswordStrengthIndicator password={password || ""} />
                 {form.formState.errors.password && (
                   <p className="text-xs text-git-danger font-medium">{form.formState.errors.password.message}</p>
                 )}
